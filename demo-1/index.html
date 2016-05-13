@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Module 15: Demo 1</title>
+
+  <!-- Libraries -->
+  <script src="https://code.jquery.com/jquery.min.js"></script>
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+  <script src="http://d3js.org/d3.v3.min.js"></script>
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="css/main.css"/>
+  <link rel="stylesheet" href="css/scroll.css"/>
+
+  <!-- your script file -->
+  <script src="js/BarChart.js"></script>
+  <script src="js/scroll.js"></script>
+  <script src="js/main.js"></script>
+</head>
+
+<body>
+    <div class="container" ng-app="myApp" id="app" ng-controller="MainController">
+      <h1>Module 15 Demo 1</h1>
+      <p>This demo demonstrates how use scrolling in D3</p>
+    <div id="sandbox">
+      <div id='graphic'>
+        <div id='sections'>
+          <section class="step">
+            <div class="title">Section 0: blue</div>
+          </section>
+          <section class="step">
+            <div class="title">Section 1: red</div>
+          </section>
+          <section class="step">
+            <div class="title">Section 2: orange</div>
+          </section>
+          <section class="step">
+            <div class="title">Section 3: black</div>
+          </section>
+          <section class="step">
+            <!-- another section -->
+          </section>
+        </div>
+        <div id='vis'>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
