@@ -1,0 +1,44 @@
+/* Main CSS file */
+
+p {
+  opacity:.7
+}
+
+.instructions > ul > li {
+  border-bottom:1px solid #D3d3d3;
+  list-style-type: none;
+  padding:10px;
+}
+
+#sandbox, #my-div {
+  margin-top:20px;
+}
+
+/* Container for the scroller */
+.scroller {
+  width:50%;
+  display:inline-block;
+  border:1px solid #d3d3d3;
+  overflow-y:auto;
+  font-size:20px;
+  padding-left:10px;
+  margin-right:20px;
+}
+
+/* Styles for each paragraph */
+.scroller p {
+  opacity:.4;
+  padding-top:10px;
+}
+
+/* Element in which you chart is rendered */
+.story   {
+  display:inline-block;
+  position:fixed;
+  top:200px;
+}
+
+/* Selected section at full opacity */
+.scroller .selected {
+  opacity:1;
+}

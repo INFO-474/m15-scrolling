@@ -137,5 +137,162 @@ Note, the code also supports tracking the progress **between two sections**, whi
 For an example, see [demo-1](demo-1).
 
 ## Angular Scrolling
+After taking the time to integrate a D3 chart into an Angular application, I imagined that there had to be a comparable way to implement a scroller. The concept is the same -- after scrolling to a particular location, fire an event with a given parameter. Because Angular does so much of the work for us in terms of firing events and tracking information, an Angular scroller really boils down to a single line of code:
 
-For an example, see [demo-2](demo-2).
+```javascript
+// Determine the current height on scrolling
+scope.step = Math.ceil((this.scrollTop - 10)/ scope.sectionHeight);
+```
+
+Ok, it's not _that_ easy, but that's the core logic that drives the entire scroller. Here's a bit more on how to set it up:
+
+### Conceptual Approach
+There are a few ways in which we can leverage Angular's structure to make it easier to build our scrolling page. First, we can store all of our annotations as part of `$scope`, and then use and `ng-repeat` statement to bind them to the DOM:
+
+```javascript
+// Text for each section
+$scope.sectionText = [
+  {text:'Section 0'},
+  {text:'Section 1'},
+  {text:'Section 2'},
+  {text:'Section 3'}
+];
+```
+
+And the corresonding HTML:
+
+```html
+<!-- Repeat a div and paragrpah for each element in your sectionText -->
+<div ng-repeat="section in sectionText">
+  <!-- Paragraph for each section of text-->
+  <p ng-bind=section.text></p>
+</div>
+```
+
+We can also store each desired application state as part of scope. For example, you may want to change your **font-size** and **color** at each part of the scrolling:
+
+```javascript
+$scope.settings = [
+  {color:'red', fontSize:20},
+  {color:'blue', fontSize:10},
+  {color:'orange', fontSize:100},
+  {color:'green', fontSize:30},
+];
+```
+
+We'll use these settings to update our chart when we scroll to the corresponding section. However, in order to fire events, we'll need to build a scroll **directive**.
+
+### Scroll Directive
+Similarly to how we had a `#sections` div in the example above, we'll need a wrapper for all of the content we want to scroll through. My suggestion on how to accomplish this is through building a **custom directive** that we can **bind a scroll event** to:
+
+```javascript
+// Scroll directive
+app.directive("scroll", function ($window) {
+    return {
+      restrict:'E', // this directive is specified as an html element <scroll>
+      scope:false, // use global scope
+      // Create a link function that allows dynamic element creation
+      link:function(scope, elem) {
+          elem.bind("scroll", function() {
+              scope.step = Math.ceil((this.scrollTop - 10)/ scope.sectionHeight);
+              scope.$apply(); // propagate change throughout module
+          });
+      }
+    };
+});
+```
+The section above creates a new `scroll` directive that binds a scroll event to the DOM element, and tracks how far the user has scrolled from the top. The step (`scope.step`) is computed by the distance from the top divided by the height of each section (`sectionHeight`), which you can specify in your application.
+
+### Chart Directive
+This structure assumes that you're using a custom chart directive, as explained in the [previous module](https://github.com/INFO-474/m14-d3-in-angular). Because the `scroller` directive adjusts the `scope.step` variable, the chart directive should be set up to use `scope.step` to build the chart. Using the `scope.settings` variable, this is fairly straightforward:
+
+```javascript
+// Get parameters for current step
+var color = scope.settings[scope.step].color;
+var fontSize = scope.settings[scope.step].fontSize;
+
+// Set parameters for chart
+var myChart = ParagraphChart().color(color).fontSize(fontSize);
+```
+
+These changes must occur in an event that is executed when the `step` value changes. Using `scope.$watch`, we're able to accomplish this:
+
+```javascript
+// Create a directive 'scatter' that creates scatterplots
+.directive('paragraphChart', function($filter, $compile) {
+	// Return your directive element
+	return {
+		restrict:'E', // this directive is specified as an html element <scatter>
+    scope:false,
+		// Create a link function that allows dynamic element creation
+		link:function(scope,elem,attrs){
+			// Use the scope.$watch method to watch for changes to the step, then re-draw your chart
+			scope.$watch('step', function() {
+
+        // Instantiate your chart with given settings
+        var color = scope.settings[scope.step].color;
+        var fontSize = scope.settings[scope.step].fontSize;
+        var myChart = ParagraphChart().color(color).fontSize(fontSize);
+
+        // Get the current data
+        var currentData = scope.data.filter(scope.settings[scope.step].filter);
+
+  			// Wrapper element to put your svg (chart) in
+  			wrapper = d3.select(elem[0])
+          .datum(currentData)
+          .call(myChart);
+			});
+		}
+	};
+});
+```
+
+### Style
+The code sections above are a bit oversimplified. For example, in the HTML section where each annotation is added, we can use `ng-style` to conditionally apply desired styles. We want the `height` of each element to be set to the `sectionHeight`, while we want the last element to be the height of the page minus the `sectionHeight`
+
+```html
+<div ng-repeat="section in sectionText" ng-style="$last == true && {'height':'calc(100vh - ' + sectionHeight + 'px)'} || {'height':sectionHeight + 'px'}">
+```
+
+Similarly, we'll want to conditionally apply a class to the selected piece of text to indicate the selected section:
+
+```html
+<p ng-class="{selected: $index == step}" ng-bind=section.text></p>
+```
+
+Here is the corresponding CSS, which is fairly similar to the CSS in the non-angular implementation:
+
+```css
+/* Container for the scroller */
+.scroller {
+  width:50%;
+  display:inline-block;
+  border:1px solid #d3d3d3;
+  overflow-y:auto;
+  font-size:20px;
+  padding-left:10px;
+  margin-right:20px;
+}
+
+/* Styles for each paragraph */
+.scroller p {
+  opacity:.4;
+  padding-top:10px;
+}
+
+/* Element in which you chart is rendered */
+.story   {
+  display:inline-block;
+  position:fixed;
+  top:200px;
+}
+
+/* Selected section at full opacity */
+.scroller .selected {
+  opacity:1;
+}
+```
+
+Again, the scroller and the visualization are displayed as inline-block elements, with the visualization (`.story`) having a fixed position.
+
+While there is a bit more overhead in setting up the Angular scroller, it provides a consistent way to keep track of application state, and fire desired events when scrolling. For an example, see [demo-2](demo-2).

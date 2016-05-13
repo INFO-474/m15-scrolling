@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Module 15: Demo 2</title>
+
+  <!-- Libraries -->
+  <script src="https://code.jquery.com/jquery.min.js"></script>
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+  <script src="http://d3js.org/d3.v3.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.2/angular.js"></script>
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="css/main.css"/>
+
+  <!-- your script file -->
+  <script src="js/ParagraphChart.js"></script>
+  <script src="js/app.js"></script>
+</head>
+
+<body>
+    <div class="container" ng-app="myApp" id="app" ng-controller="MainController">
+      <h1>Module 15 Demo 2</h1>
+      <p>This demo demonstrates how to build a scroller in Angular. </p>
+      <section id="sandbox">
+        <div>
+          <p><strong>Current Step:</strong> {{step}}</p>
+        </div>
+        <!-- Scroller directive: set class 'scroller', and comput height -->
+        <scroll class="scroller" ng-style="{'height':'calc(100vh - ' + sectionHeight + 'px)'}">
+          <!-- Use ng-repeat to have a section of text for each element in your sectionText data
+              Calculate the height of the last element as the height of the scroller directive
+          -->
+          <div ng-repeat="section in sectionText" ng-style="$last == true && {'height':'calc(100vh - ' + sectionHeight + 'px)'} || {'height':sectionHeight + 'px'}">
+
+            <!-- Paragraph for each section of text, with class 'selected' if $index is current step -->
+            <p ng-class="{selected: $index == step}" ng-bind=section.text></p>
+
+          </div>
+        </scroll>
+
+        <!-- Paragraph-chart directive with class story for positioning -->
+        <paragraph-chart class="story"></paragraph-chart>
+      </section>
+  </body>
+</html>
